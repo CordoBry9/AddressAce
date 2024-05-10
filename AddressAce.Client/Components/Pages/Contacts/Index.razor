@@ -1,0 +1,49 @@
+﻿@page "/contacts"
+
+@attribute [Authorize]
+@rendermode InteractiveServer
+@inject IContactDTOService ContactService
+
+<PageTitle>AddressAce | Contacts</PageTitle>
+
+<div class="d-flex align-items-center mt-3">
+    <h1>All Contacts</h1>
+    <a href="contacts/create" class="ms-auto btn btn-primary rounded-pill">New Contact</a>
+
+    <ul>
+        @foreach(ContactDTO contact in contacts)
+        {
+            <li><img height="30" src="@contact.ImageUrl"/>
+                @contact.FullName
+            </li>
+        }
+    </ul>
+</div>
+
+@code {
+    #region parameters
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+    #endregion
+
+    #region state
+    private UserInfo? userInfo;
+    private IEnumerable<ContactDTO> contacts = [];
+    #endregion
+
+    #region methods
+    protected override async Task OnInitializedAsync()
+    {
+
+        //get the userId from the auth state
+        //make the getcontacts async method in the DTO service
+        //make a repository method for get contacts async
+        //add those to the interface
+        userInfo = await UserInfoHelper.GetUserInfoAsync(AuthStateTask);
+        contacts = await ContactService.GetContactsAsync(userInfo!.UserId);
+
+    }
+
+
+    #endregion
+}

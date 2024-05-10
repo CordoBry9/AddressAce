@@ -1,0 +1,189 @@
+﻿@if(Category is not null)
+{
+    <div class="accordion-item">
+        <div class="accordion-header">
+            @if(status == Status.Viewing)
+            {
+                <div class="d-md-flex gap-3 p-3">
+
+                <div class="flex-grow-1 hstack gap-2 align-items-center" role="button" data-bs-toggle="collapse" data-bs-target="#collapse-@Category.Id">
+
+                    <span class="badge bg-secondary rounded-pill small">
+
+                        @Category.Contacts.Count
+
+                    </span>
+                    <span>
+
+                        @Category.Name
+
+                    </span>
+
+                </div>
+                <div class="mt-2 mt-md-0">
+                    <span class="text-nowrap">
+                        <a role="button" class="me-1" @onclick="() => status = Status.Editing">
+                            <i class="bi bi-pencil-fill" aria-label="Edit Category"></i>
+                        </a>
+                        <a role="button" class="me-1" @onclick="() => status = Status.Deleting">
+                            <i class="bi bi-trash-fill text-danger" aria-label="Delete Category"></i>
+                        </a>
+                        @*TODO take me to the contacts index filtered by this category*@
+                        <a href="contacts" class="me-1">
+                            <i class="bi bi-eye-fill" aria-label="View Category"></i>
+                        </a>
+                        @*TODO email the whole category*@
+                        <a href="#" class="me-1">
+                            <i class="bi bi-envelope-fill" aria-label="Email Category"></i>
+                        </a>
+                    </span>
+                </div>
+                </div>
+            }
+            else if (status == Status.Deleting)
+            {
+                <div class="d-md-flex gap-3 p-3">
+
+                    <div class="flex-grow-1 hstack gap-2 align-items-center" role="button" data-bs-toggle="collapse" data-bs-target="#collapse-@Category.Id">
+
+                        <span class="badge bg-secondary rounded-pill small">
+
+                            @Category.Contacts.Count
+
+                        </span>
+                        <span>
+
+                            @Category.Name
+
+                        </span>
+
+                    </div>
+                    <div class="mt-2 mt-md-0 text-danger small">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        Are you sure you want the delete this category?
+                        <span class="text-nowrap p-1">              
+                            <button class="btn btn-sm btn-danger" @onclick="DeleteCategory">
+                                <i class="bi bi-trash"></i>
+                                Delete
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary" @onclick="() => status = Status.Viewing">
+                                <i class="bi bi-x"></i>
+                                Cancel
+                            </button>
+                        </span>
+                    </div>
+                </div>
+            }
+            else if (status == Status.Editing)
+            {
+                <EditForm Model="Category" class="d-md-flex gap-3 p-3" OnValidSubmit="UpdateCategory">
+                    <DataAnnotationsValidator/>
+                    <div class="flex-grow-1 hstack gap-2 align-items-center" role="button">
+
+                        <span class="badge bg-secondary rounded-pill small" data-bs-toggle="collapse" data-bs-target="#collapse-@Category.Id">
+
+                            @Category.Contacts.Count
+
+                        </span>
+                        <div class="vstack gap-2">
+                            <InputText @bind-Value="Category.Name" class="form-control"/>
+                            <ValidationMessage For="() => Category.Name"/>
+                        </div>
+
+                    </div>
+                    <div class="mt-2 mt-md-0">
+                        <span class="text-nowrap">
+                            <button type="submit" class="btn btn-primary btn-sm me-1">
+                                <i class="bi bi-floppy"></i>
+                                Save Changes
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger" @onclick="CancelEdit">
+                                <i class="bi bi-x"></i>
+                                Cancel
+                            </button>
+                        </span>
+                    </div>
+                </EditForm>
+            }
+        </div>
+        <div id="collapse-@Category.Id" class="accordion-collapse collapse" data-bs-parent="#@AccordionId">
+            <div class="accordion-body">
+                <ul class="list-group">
+                    @*TODO display the contacts here*@
+                    <li class="list-group-item text-center lead text-secondary">
+                        No contacts in this category
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+}
+
+
+@code {
+    #region parameters
+    [Parameter, EditorRequired]
+    public string? AccordionId { get; set; }
+
+    [Parameter, EditorRequired]
+    public CategoryDTO? Category { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback<int> DeleteTheCategory { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback<CategoryDTO> UpdateTheCategory { get; set; }
+    #endregion
+
+    #region state
+
+    private Status status = Status.Viewing;
+
+    private string? originalName;
+
+    private enum Status
+    {
+        Viewing, 
+        Editing,
+        Deleting,
+    }
+
+    #endregion
+
+    #region methods
+
+    protected override void OnParametersSet()
+    {
+        if (Category is not null)
+        {
+            originalName = Category.Name;
+        }
+    }
+
+    private void CancelEdit()
+    {
+        if(!string.IsNullOrEmpty(originalName))
+        {
+            Category!.Name = originalName;
+        }
+
+        status = Status.Viewing;
+    }
+
+    private async Task DeleteCategory()
+    {
+        if (Category != null)
+        {
+            await DeleteTheCategory.InvokeAsync(Category.Id);
+        }
+        status = Status.Viewing;
+    }
+
+    private async Task UpdateCategory()
+    {
+        await UpdateTheCategory.InvokeAsync(Category);
+        status = Status.Viewing;
+    }
+    #endregion
+}

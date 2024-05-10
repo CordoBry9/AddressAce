@@ -1,0 +1,31 @@
+﻿<div class="accordion" id="@accordionId">
+    @foreach(CategoryDTO category in Categories)
+    {
+        <CategoryAccordionItem @key="category.Id"
+                        AccordionId="@accordionId"
+                        Category="category"
+                        DeleteTheCategory="DeleteTheCategory"
+                        UpdateTheCategory="UpdateTheCategory"/>
+    }
+</div>
+
+@code {
+    #region parameters
+    [Parameter, EditorRequired]
+    public IEnumerable<CategoryDTO> Categories { get; set; } = [];
+
+    [Parameter, EditorRequired]
+    public EventCallback<int> DeleteTheCategory { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback<CategoryDTO> UpdateTheCategory { get; set; }
+    #endregion
+
+    #region state
+    private string accordionId = Guid.NewGuid().ToString();
+    #endregion
+
+    #region methods
+    #endregion
+
+}

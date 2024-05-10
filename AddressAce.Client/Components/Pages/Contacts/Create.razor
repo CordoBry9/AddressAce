@@ -1,0 +1,35 @@
+﻿@page "/contacts/create"
+@using AddressAce.Client.Components.UI.Contacts
+@attribute [Authorize]
+@rendermode InteractiveServer
+@inject IContactDTOService ContactService
+@inject NavigationManager Nav
+
+<PageTitle>AddressAce | New Contact</PageTitle>
+
+<div class="p-3 my-5 border border-2 shadow-lg bg-light">
+    <ContactForm Contact="new ContactDTO()" OnSubmit="HandleSubmit"></ContactForm>
+</div>
+
+
+@code {
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+
+    private async Task HandleSubmit(ContactDTO contact)
+    {
+
+        UserInfo? userInfo = await UserInfoHelper.GetUserInfoAsync(AuthStateTask);
+
+        if (userInfo is not null)
+        {
+            await ContactService.CreateContactAsync(contact, userInfo.UserId);
+            Nav.NavigateTo("contacts");
+        }
+        
+    }
+
+
+}
