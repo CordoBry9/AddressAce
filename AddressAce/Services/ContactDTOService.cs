@@ -43,6 +43,19 @@ namespace AddressAce.Services
 
         }
 
+        public async Task DeleteContactAsync(int contactId, string userId)
+        {
+            await repository.DeleteContactAsync(contactId, userId);
+        }
+
+        public async Task<ContactDTO?> GetContactByIdAsync(int contactId, string userId)
+        {
+            Contact? contact = await repository.GetContactByIdAsync(contactId, userId);
+
+            return contact?.ToDTO();
+            
+        }
+
         public async Task<IEnumerable<ContactDTO>> GetContactsAsync(string userId)
         {
             IEnumerable<Contact> contacts = await repository.GetContactsAsync(userId);
@@ -50,6 +63,47 @@ namespace AddressAce.Services
             IEnumerable<ContactDTO> contactDTOs = contacts.Select(c => c.ToDTO());
 
             return contactDTOs;
+        }
+
+        public async Task UpdateContactAsync(ContactDTO contactDTO, string userId)
+        {
+            Contact? contact = await repository.GetContactByIdAsync(contactDTO.Id, userId);
+
+            if (contact is not null)
+            {
+                contact.FirstName = contactDTO.FirstName;
+                contact.LastName = contactDTO.LastName;
+                contact.Email = contactDTO.Email;   
+                contact.Address1 = contactDTO.Address1;
+                contact.Address2 = contactDTO.Address2;
+                contact.BirthDate = contactDTO.BirthDate;
+                contact.City = contactDTO.City;
+                contact.State = contactDTO.State;
+                contact.ZipCode = contactDTO.ZipCode;
+                contact.PhoneNumber = contactDTO.PhoneNumber;
+
+                if (contactDTO.ImageUrl.StartsWith("data:"))
+                {
+                    contact.Image = UploadHelper.GetImageUpload(contactDTO.ImageUrl);
+                }
+                else
+                {
+                    contact.Image = null;
+                }
+                //dont let the database update categories yet
+                contact.Categories.Clear();
+
+                await repository.UpdateContactAsync(contact);
+
+                //remove the old categories
+                await repository.RemoveCategoriesFromContactAsync(contact.Id, userId);
+
+                //add back what the user selected
+                IEnumerable<int> selectedCategoryIds = contactDTO.Categories.Select(c => c.Id);
+
+                await repository.AddCategoriesToContactAsync(contact.Id, userId, selectedCategoryIds);
+
+            }
         }
     }
 }

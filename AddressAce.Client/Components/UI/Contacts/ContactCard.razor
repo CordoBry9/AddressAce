@@ -1,0 +1,90 @@
+﻿
+@if (Contact is not null)
+{
+    <div class="card h-100">
+        <div class="row g-1">
+            <div class="col-md-4 square-img-container rounded-start overflow-hidden">
+                @* contact image here *@
+                <img src="@Contact.ImageUrl" class="square-img" alt="Contact Image" />
+            </div>
+            <div class="col-md-8">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        @Contact.FullName
+                    </h5>
+                    <address class="card-text">
+                        @Contact.Address1 <br />
+                        @if (!string.IsNullOrEmpty(Contact.Address2))
+                        {
+                            @Contact.Address2 <br />
+                        }
+                        @Contact.City,
+                        @Contact.State,
+                        @Contact.ZipCode,
+                        @*
+                    Contact address 1, address 2, city, state, and zip
+                    *@
+                    </address>
+                    <div class="card-text">
+                        <span class="fw-bold me-2">Phone:@Contact.PhoneNumber</span>@* phone number *@
+                    </div>
+                    <div class="card-text text-truncate">
+                        <span class="fw-bold me-2">Email:@Contact.Email</span>
+                    </div>
+                    @if(isDeleting == false)
+                    {
+                        <div class="fs-4">
+                            <a class="me-3 editIcons" href="/contacts/edit/@Contact.Id"><i class="bi bi-pencil-fill "></i></a>
+                            <a class="me-3 editIcons" href="#"><i class="bi bi-envelope-fill "></i></a>
+                            <a class="me-3 editIcons" role="button" @onclick="() => isDeleting = true">
+                                <i class="bi bi-trash-fill text-danger "></i>
+                            </a>
+                        </div>
+
+                    }
+                    else
+                    {
+                        <div class="text-danger">Are you sure you want to delete the contact?</div>
+                        <button class="btn btn-sm btn-danger me-1" @onclick="DeleteContact">Delete</button>
+                        <button class="btn btn-sm btn-secondary" @onclick="() => isDeleting = false">Cancel</button>
+                    }
+
+
+                    <div class="hstack gap-2 flex-wrap mt-2">
+                        @foreach (CategoryDTO category in Contact.Categories)
+                        {
+                            <a href="#" class="text-decoration-none badge rounded-pill border border-1 text-dark fw-normal">
+                                @category.Name
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@code {
+    private bool isDeleting = false;
+
+    [Parameter, EditorRequired]
+    public ContactDTO? Contact { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback<int> DeleteTheContact { get; set; }
+
+    private string? originalName;
+
+    private async Task DeleteContact()
+    {
+        if (Contact != null)
+        {
+            await DeleteTheContact.InvokeAsync(Contact!.Id);
+            isDeleting = false;
+        }
+    }
+
+
+}

@@ -6,7 +6,11 @@ namespace AddressAce.Services.Interfaces
     {
         Task<Contact> CreateContactAsync(Contact contact);
         Task AddCategoriesToContactAsync(int contactId, string userId, IEnumerable<int> categoryIds);
-
+        Task RemoveCategoriesFromContactAsync(int contactId, string userId);
         Task<IEnumerable<Contact>> GetContactsAsync(string userId);
+        Task<Contact?>GetContactByIdAsync(int contactId, string userId);
+        Task UpdateContactAsync(Contact contact);
+        Task DeleteContactAsync(int contactId, string userId);
+        
     }
 }

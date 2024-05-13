@@ -1,6 +1,8 @@
 ﻿@using AddressAce.Client.Helpers
 @using AddressAce.Client.Models.Enums
 @inject ICategoryDTOService CategoryService
+@inject IContactDTOService ContactService
+@inject NavigationManager Nav
 @if (Contact is not null)
 {
     <EditForm Model="Contact" OnValidSubmit="HandleSubmit">
@@ -13,7 +15,7 @@
                 <div>
                     <InputFile OnChange="OnFileChange" class="form-control mt-2" accept=".png, .jpg, .jpeg, .svg" />
                     <span class="text-danger">
-                        @* images with errors *@
+                        @imageError
                     </span>
                 </div>
             </div>
@@ -117,6 +119,8 @@
 @code {
 
     #region parameters
+    [Parameter] public int ContactId { get; set; }
+
     [Parameter, EditorRequired]
     public ContactDTO? Contact { get; set; }
 
@@ -143,6 +147,7 @@
         {
             userInfo = await UserInfoHelper.GetUserInfoAsync(AuthStateTask);
             categories = await CategoryService.GetCategoriesAsync(userInfo!.UserId);
+            selectedCategoryIds = Contact!.Categories.Select(c => c.Id).ToArray();
         }
         catch (Exception ex)
         {
@@ -152,15 +157,7 @@
 
     private async Task HandleSubmit()
     {
-
-        // foreach (int id in selectedCategoryIds)
-        // {
-        //     CategoryDTO category = categories.First(c => c.Id == id);
-
-        //     Contact!.Categories.Add(category);
-        // }
-
-        // Contact!.Categories = selectedCategoryIds.Select(id => categories.First(c => c.Id == id)).ToList();
+        Contact!.Categories.Clear();
 
         foreach(int id in selectedCategoryIds)
         {
@@ -172,7 +169,6 @@
                 }
             }
         }
-
 
         await OnSubmit.InvokeAsync(Contact);
 

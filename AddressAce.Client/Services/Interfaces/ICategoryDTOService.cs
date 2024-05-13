@@ -14,5 +14,7 @@ namespace AddressAce.Client.Services.Interfaces
         Task DeleteCategoryAsync(int categoryId, string userId);
 
         Task UpdateCategoryAsync(CategoryDTO category, string userId);
+
+        
     }
 }

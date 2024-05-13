@@ -75,7 +75,7 @@ namespace AddressAce.Client.Models
 
         public virtual ICollection<CategoryDTO> Categories { get; set; } = new HashSet<CategoryDTO>();
 
-        public string? ImageUrl { get; set; } = ImageHelper.DefaultContactImage;
+        public string ImageUrl { get; set; } = ImageHelper.DefaultContactImage;
 
         //TODO: what about DTOS?
     }
