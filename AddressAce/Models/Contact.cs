@@ -42,9 +42,7 @@ namespace AddressAce.Models
         [Required]
         [Display(Name = "Address")]
         public string? Address1 { get; set; }
-
-
-        [Required]
+  
         [Display(Name = "Address2")]
         public string? Address2 { get; set; }
 

@@ -182,13 +182,13 @@
     /* #endregion gray */
 }
 
-a {
+/*a {
     color: var(--bac-theme-500);
 }
 
     a:hover {
         color: var(--bac-theme-300);
-    }
+    }*/
 
 .btn-primary {
     --bs-btn-bg: var(--bac-theme-600);

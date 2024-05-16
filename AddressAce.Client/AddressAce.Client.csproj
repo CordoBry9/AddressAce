@@ -9,11 +9,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Components\UI\Categories\CategoryAccordionItem.razor.css" />
     <None Remove="Components\UI\Contacts\ContactCard.razor.css" />
+    <None Remove="Components\UI\ToastMessage.razor.js" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Components\UI\Categories\CategoryAccordionItem.razor.css" />
     <Content Include="Components\UI\Contacts\ContactCard.razor.css" />
+    <Content Include="Components\UI\ToastMessage.razor.js" />
   </ItemGroup>
 
   <ItemGroup>

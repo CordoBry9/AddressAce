@@ -13,8 +13,9 @@ namespace AddressAce.Client.Services.Interfaces
 
         Task DeleteCategoryAsync(int categoryId, string userId);
 
-        Task UpdateCategoryAsync(CategoryDTO category, string userId);
+        Task UpdateCategoryAsync(int categoryId, CategoryDTO category, string userId);
 
+        Task<bool> EmailCategoryAsync(int categoryId, EmailData emailData, string userId);
         
     }
 }

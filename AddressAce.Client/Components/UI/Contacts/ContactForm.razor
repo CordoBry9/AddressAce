@@ -81,10 +81,10 @@
                                      placeholder="Zip" />
                         <ValidationMessage For="() => Contact.ZipCode" />
                     </div>
-                    <div class="col-12">
+                    <div class="col-12 col-md-6">
                         <label for="categories" class="form-label">
                             Categories
-                        </label>"
+                        </label>
                         <InputSelect id="categories" class="form-control" @bind-Value="selectedCategoryIds">
                             @foreach (CategoryDTO category in categories)
                             {

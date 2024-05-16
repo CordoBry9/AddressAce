@@ -25,3 +25,22 @@
     object-fit: cover;
 
 }
+
+/* Remove blue color on click */
+.navbar-nav .dropdown-item:focus,
+.navbar-nav .dropdown-item:active {
+    color: #212529 !important; /* Default text color */
+    background-color: transparent !important; /* Remove blue background */
+}
+
+/* Proper highlighting on hover */
+.navbar-nav .dropdown-item:hover {
+    color: #ffffff !important; /* Text color on hover */
+    background-color: #007bff !important; /* Background color on hover */
+}
+
+/* Proper highlighting when active */
+.navbar-nav .dropdown-item.active {
+    color: #ffffff !important; /* Text color when active */
+    background-color: #007bff !important; /* Background color when active */
+}

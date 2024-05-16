@@ -1,12 +1,10 @@
-﻿@page "/contacts/edit/{contactId:int}"
+﻿@page "/contacts/edit/{ContactId:int}"
 @using AddressAce.Client.Components.UI.Contacts
 @using AddressAce.Client.Models
-
 @attribute [Authorize]
 @inject IContactDTOService ContactService
 @inject NavigationManager Nav
-
-@rendermode InteractiveServer
+@rendermode InteractiveAuto
 
 <PageTitle>AddressAce | @(string.IsNullOrEmpty(contact?.FullName) ? "Edit Contact" : contact.FullName)</PageTitle>
 
@@ -23,7 +21,7 @@
     private ContactDTO? contact { get; set; }
 
     [Parameter] 
-    public int contactId { get; set; }
+    public int ContactId { get; set; }
 
     [CascadingParameter]
     private Task<AuthenticationState>? AuthStateTask { get; set; }
@@ -33,7 +31,7 @@
         try
         {
             userInfo = await UserInfoHelper.GetUserInfoAsync(AuthStateTask);
-            contact = await ContactService.GetContactByIdAsync(contactId, userInfo!.UserId);
+            contact = await ContactService.GetContactByIdAsync(ContactId, userInfo!.UserId);
         }
         catch(Exception ex)
         {

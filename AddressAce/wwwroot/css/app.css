@@ -1,3 +1,25 @@
+
+.card-bg-color {
+    background-color: var(--bac-theme-700);
+}
+
+.login-btns {
+    background-color: var(--bac-theme-400);
+}
+
+
+.previewImage 
+{
+    aspect-ratio: 1/1;
+    height: 2rem;
+    width: 2rem;
+    border-radius: 50%;
+    object-position: center;
+    object-fit: cover;
+
+}
+
+
 .square-img-container {
     position: relative;
     background-color: #edf5fc;

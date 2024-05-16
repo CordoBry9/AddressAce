@@ -9,5 +9,6 @@ namespace AddressAce.Services.Interfaces
         Task DeleteCategoryAsync(int categoryId, string userId);
         Task<Category?> GetCategoryByIdAsync(int categoryId, string userId);
         Task UpdateCategoryAsync(Category category, string userId);
+        
     }
 }

@@ -3,10 +3,12 @@ using AddressAce.Client.Services.Interfaces;
 using AddressAce.Helpers;
 using AddressAce.Models;
 using AddressAce.Services.Interfaces;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace AddressAce.Services
 {
-    public class ContactDTOService(IContactRepository repository) : IContactDTOService
+    public class ContactDTOService(IContactRepository repository, IEmailSender emailSender) : IContactDTOService
     {
         public async Task<ContactDTO> CreateContactAsync(ContactDTO contactDTO, string userId)
         {
@@ -48,6 +50,31 @@ namespace AddressAce.Services
             await repository.DeleteContactAsync(contactId, userId);
         }
 
+        public async Task<bool> EmailContactAsync(int contactId, EmailData emailData, string userId)
+        {
+            try
+            {
+                Contact? contact = await repository.GetContactByIdAsync(contactId, userId);
+                if (contact == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    string recipient = contact.Email!;
+                    await emailSender.SendEmailAsync(recipient, emailData.Subject!, emailData.Message!);
+
+                    return true;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return false;
+            }
+        }
+
         public async Task<ContactDTO?> GetContactByIdAsync(int contactId, string userId)
         {
             Contact? contact = await repository.GetContactByIdAsync(contactId, userId);
@@ -63,6 +90,30 @@ namespace AddressAce.Services
             IEnumerable<ContactDTO> contactDTOs = contacts.Select(c => c.ToDTO());
 
             return contactDTOs;
+        }
+
+        public async Task<IEnumerable<ContactDTO>> GetContactsByCategoryIdAsync(int categoryId, string userId)
+        {
+            IEnumerable<Contact> contacts = await repository.GetContactsByCategoryIdAsync(categoryId, userId);
+
+            return contacts.Select(c => c.ToDTO());
+
+            //List<ContactDTO> contactDTOs = [];
+
+            //foreach (Contact contact in contacts)
+            //{
+            //    contactDTOs.Add(contact.ToDTO());
+            //}
+            //return contactDTOs;
+
+
+        }
+
+        public async Task<IEnumerable<ContactDTO>> SearchContactsAsync(string searchTerm, string userId)
+        {
+            IEnumerable<Contact> contacts = await repository.SearchContactsAsync(searchTerm, userId);
+
+            return contacts.Select(c => c.ToDTO());
         }
 
         public async Task UpdateContactAsync(ContactDTO contactDTO, string userId)

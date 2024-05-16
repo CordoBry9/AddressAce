@@ -8,10 +8,16 @@ namespace AddressAce.Client.Services.Interfaces
 
         Task<IEnumerable<ContactDTO>> GetContactsAsync(string userId);
 
+        Task<IEnumerable<ContactDTO>> GetContactsByCategoryIdAsync(int categoryId, string userId);
+
         Task UpdateContactAsync(ContactDTO contactDTO, string userId);
 
         Task<ContactDTO?> GetContactByIdAsync(int contactId, string userId);
 
         Task DeleteContactAsync(int contactId, string userId);
+
+        Task<IEnumerable<ContactDTO>> SearchContactsAsync(string searchTerm, string userId);
+
+        Task<bool> EmailContactAsync(int contactId, EmailData emailData, string userId);
     }
 }

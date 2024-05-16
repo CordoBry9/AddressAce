@@ -37,7 +37,9 @@ namespace AddressAce.Services
 
             using ApplicationDbContext context = contextFactory.CreateDbContext();
 
-            IEnumerable<Category> categories = await context.Categories.Where(t => t.AppUserId == userId).ToListAsync();
+            IEnumerable<Category> categories = await context.Categories.Where(t => t.AppUserId == userId)
+                .Include(c => c.Contacts)
+                .ToListAsync();
 
             return categories;
         }
@@ -46,7 +48,7 @@ namespace AddressAce.Services
         {
             using ApplicationDbContext context = contextFactory.CreateDbContext();
 
-            Category? category = await context.Categories.FirstOrDefaultAsync(c => c.Id == categoryId && c.AppUserId == userId);
+            Category? category = await context.Categories.Include(c => c.Contacts).FirstOrDefaultAsync(c => c.Id == categoryId && c.AppUserId == userId);
 
             return category;
         }

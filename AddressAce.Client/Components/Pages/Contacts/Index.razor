@@ -1,36 +1,65 @@
 ﻿@page "/contacts"
 @using AddressAce.Client.Components.UI.Contacts
 @attribute [Authorize]
-@rendermode InteractiveServer
+@rendermode InteractiveAuto
 @inject IContactDTOService ContactService
+@inject ICategoryDTOService CategoryService
+@inject NavigationManager Nav
+
 
 <PageTitle>AddressAce | Contacts</PageTitle>
 
 <div class="d-flex align-items-center mt-3">
-    <h1>All Contacts</h1>
+    @if (!string.IsNullOrWhiteSpace(SearchTerm))
+    {
+        <h1>Search results for "@SearchTerm"</h1>
+    }
+    else if (CategoryId is not null or 0)
+    {
+        @foreach (CategoryDTO category in categories)
+        {
+            if (category.Id == CategoryId)
+            {
+                <h1>Category: @category.Name</h1>
+            }
+        }
+    }
+    else
+    {
+        <h1>All Contacts</h1>
+    }
+
     <a href="contacts/create" class="ms-auto btn btn-primary rounded-pill">New Contact</a>
 </div>
 
 <div class="row g-3">
     <div class="col-12 col-lg-4">
         <div class="sideNav mb-3">
-            <form>
+            <form @onsubmit="HandleSearch">
                 <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Search" />
-                    <button class="btn btn-primary">Search</button>
+                    <InputText @bind-Value="searchInput" class="form-control" placeholder="Search" />
+                    <button class="btn btn-primary"><i class="bi bi-search"></i></button>
                 </div>
             </form>
             <div class="mt-5">
                 <label class="form-label">Category Filter</label>
-                <select class="form-select">
+                <InputSelect class="form-select" @bind-Value="CategoryId" @bind-Value:after="HandleCategoryChange">
                     <option value="">All Contacts</option>
-                </select>
+                    @foreach (CategoryDTO category in categories)
+                    {
+                        <option value="@category.Id">@category.Name</option>
+                    }
+                </InputSelect>
             </div>
         </div>
+        @if (!string.IsNullOrEmpty(toastMessage))
+        {
+            <ToastMessage @key="@messageId" Message="@toastMessage" Color="@messageColor" />
+        }
     </div>
     <div class="col-12 col-lg-8">
-        <div class="row rols-cols-1 row-cols-sm-2 row-cols-md-1 g-3">
-            @if(contacts.Any())
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-1 g-3">
+            @if (contacts.Any())
             {
                 @foreach (ContactDTO contact in contacts)
                 {
@@ -48,7 +77,7 @@
                         Why don't you <a href="contacts/create">create some</a>?
                     </p>
                 </div>
-                    
+
             }
         </div>
     </div>
@@ -59,26 +88,120 @@
     #region parameters
     [CascadingParameter]
     private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    [SupplyParameterFromQuery]
+    public int? CategoryId { get; set; }
+
+    [SupplyParameterFromQuery]
+    public string? SearchTerm { get; set; }
+
+    [SupplyParameterFromQuery] // ?message=hello
+    public string? Message { get; set; }
+
     #endregion
 
     #region state
     private UserInfo? userInfo;
     private IEnumerable<ContactDTO> contacts = [];
+    private IEnumerable<CategoryDTO> categories = [];
+    private string? searchInput;
+    private string? toastMessage;
+    private string? messageColor;
+    private Guid messageId = Guid.NewGuid();
     #endregion
 
     #region methods
     protected override async Task OnInitializedAsync()
     {
-
         userInfo = await UserInfoHelper.GetUserInfoAsync(AuthStateTask);
-        contacts = await ContactService.GetContactsAsync(userInfo!.UserId);
-
+        categories = await CategoryService.GetCategoriesAsync(userInfo!.UserId);
     }
+
+    protected override async Task OnParametersSetAsync()
+    {
+
+        if (!string.IsNullOrEmpty(Message))
+        {
+            ShowToastMessage(Message);
+        }
+
+        if (!string.IsNullOrWhiteSpace(SearchTerm))
+        {
+            searchInput = SearchTerm;
+            CategoryId = null;
+            contacts = await ContactService.SearchContactsAsync(SearchTerm, userInfo!.UserId);
+        }
+        else if (CategoryId is not null or 0)
+        {
+            contacts = await ContactService.GetContactsByCategoryIdAsync(CategoryId.Value, userInfo!.UserId);
+        }
+        else
+        {
+            contacts = await ContactService.GetContactsAsync(userInfo!.UserId);
+        }
+    }
+
     private async Task DeleteContact(int contactId)
     {
-        await ContactService.DeleteContactAsync(contactId, userInfo!.UserId);
-        contacts = await ContactService.GetContactsAsync(userInfo!.UserId);
+        try
+        {
+            await ContactService.DeleteContactAsync(contactId, userInfo!.UserId);
+            contacts = await ContactService.GetContactsAsync(userInfo!.UserId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
     }
 
+    private void HandleCategoryChange()
+    {
+
+        Dictionary<string, object?> queryParameters = new Dictionary<string, object?>()
+        {
+            { nameof(CategoryId), CategoryId},
+            { nameof(SearchTerm), null },
+            { nameof(Message), null },
+        };
+
+        ShowToastMessage("Category was changed");
+        string url = Nav.GetUriWithQueryParameters(queryParameters);
+        Nav.NavigateTo(url);
+
+
+    }
+
+    private void HandleSearch()
+    {
+        Dictionary<string, object?> queryParameters = new Dictionary<string, object?>()
+        {
+            { nameof(CategoryId), null},
+            { nameof(Message), null },
+            { nameof(SearchTerm), searchInput },
+
+        };
+
+
+        string url = Nav.GetUriWithQueryParameters(queryParameters);
+        Nav.NavigateTo(url);
+    }
+
+    private void ShowToastMessage(string message)
+    {
+        toastMessage = message;
+
+        if (message.ToLower().Contains("wrong") || message.ToLower().Contains("error"))
+        {
+            messageColor = "danger";
+
+        }
+        else
+        {
+            messageColor = "success";
+        }
+
+        //this will reset the toast component
+        messageId = Guid.NewGuid();
+    }
     #endregion
 }

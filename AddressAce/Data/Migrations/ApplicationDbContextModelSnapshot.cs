@@ -137,7 +137,6 @@ namespace AddressAce.Data.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Address2")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("AppUserId")
@@ -151,8 +150,7 @@ namespace AddressAce.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTimeOffset?>("Created")
-                        .IsRequired()
+                    b.Property<DateTimeOffset>("Created")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
@@ -369,7 +367,7 @@ namespace AddressAce.Data.Migrations
             modelBuilder.Entity("AddressAce.Models.Category", b =>
                 {
                     b.HasOne("AddressAce.Data.ApplicationUser", "AppUser")
-                        .WithMany()
+                        .WithMany("Categories")
                         .HasForeignKey("AppUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -380,7 +378,7 @@ namespace AddressAce.Data.Migrations
             modelBuilder.Entity("AddressAce.Models.Contact", b =>
                 {
                     b.HasOne("AddressAce.Data.ApplicationUser", "AppUser")
-                        .WithMany()
+                        .WithMany("Contacts")
                         .HasForeignKey("AppUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -458,6 +456,13 @@ namespace AddressAce.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("AddressAce.Data.ApplicationUser", b =>
+                {
+                    b.Navigation("Categories");
+
+                    b.Navigation("Contacts");
                 });
 #pragma warning restore 612, 618
         }
