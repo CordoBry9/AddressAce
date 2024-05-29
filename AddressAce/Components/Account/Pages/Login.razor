@@ -4,7 +4,7 @@
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Identity
 @using AddressAce.Data
-
+@inject IConfiguration Config
 @inject SignInManager<ApplicationUser> SignInManager
 @inject ILogger<Login> Logger
 @inject NavigationManager NavigationManager
@@ -87,8 +87,6 @@
                     <span class="p-2">or</span>
                     <hr class="flex-grow-1">
                 </div>
-                <div class="text-center"><a type="button" class="btn btn-outline-primary mt-3 mb-3">Login as a Demo</a></div>
-                <hr />
                 <div class="row text-center">
                     
                     <div class="col-12 col-md-6 pt-2">
@@ -106,8 +104,12 @@
                         <a class="btn btn-primary" href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</a>
                     </div>
                 </div>
-
             </EditForm>
+            <hr />
+            <form class="text-center" method="post" @formname="demoLogin" @onsubmit="LoginDemoUser">
+                <AntiforgeryToken />
+                <button class="btn btn-primary">Log in as a demo user</button>
+            </form>
         </div>
     </div>
 </div>
@@ -127,11 +129,30 @@
 
     protected override async Task OnInitializedAsync()
     {
+        Input ??= new();
         if (HttpMethods.IsGet(HttpContext.Request.Method))
         {
             // Clear the existing external cookie to ensure a clean login process
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
         }
+    }
+
+    public async Task LoginDemoUser()
+    {
+        string? demoEmail = Config["DemoUserLogin"];
+
+        if (!string.IsNullOrEmpty(demoEmail))
+        {
+            ApplicationUser? demoUser = await SignInManager.UserManager.FindByEmailAsync(demoEmail);
+
+            if (demoUser is not null)
+            {
+                await SignInManager.SignInAsync(demoUser, false);
+                RedirectManager.RedirectTo(ReturnUrl);
+            }
+        }
+
+        errorMessage = "Error: Demo user login is not available.";
     }
 
     public async Task LoginUser()
